@@ -179,4 +179,4 @@ PROTOCOLO CI-V IMPLEMENTADO
 
 
 ---
-EA3TB  ·  Parets del Vallès  ·  2026
+EA3TB  ·  Caldes de Montbui  ·  2026
