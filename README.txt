@@ -1,3 +1,7 @@
+A la derecha del monitor en "Raleases" encontarás el ejecutable para descargar 
+
+
+
 ICOM - Memory Panel
 ===================
 Control remoto de memorias de voz y CW para transceptores Icom
