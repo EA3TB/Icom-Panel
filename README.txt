@@ -50,8 +50,8 @@ CONFIGURACIÓN (radio_config.json)
 {
   "model":    "Icom IC-7610",
   "ip":       "192.168.1.25",   <- IP del transceptor en tu red
-  "user":     "ea3tb",          <- Usuario configurado en la radio
-  "pass":     "ea3aiiea3aii",   <- Contraseña de la radio
+  "user":     "**",          <- Usuario configurado en la radio
+  "pass":     "**",   <- Contraseña de la radio
   "civ_addr": 152               <- Dirección CIV (no cambiar para IC-7610)
 }
 
