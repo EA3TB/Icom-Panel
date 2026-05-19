@@ -1,4 +1,4 @@
-A la derecha del monitor en "Raleases" encontarás el ejecutable para descargar 
+A la derecha de tu monitor en "Releases" encontarás el ejecutable para descargar 
 
 
 
