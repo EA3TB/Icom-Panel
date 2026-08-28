@@ -1,7 +1,7 @@
 {
-  "model": "Icom IC-7610",
-  "ip": "192.168.1.25",
-  "user": "",
-  "pass": "",
-  "civ_addr": 152
+  "model": "**",
+  "ip": "**",
+  "user": "**",
+  "pass": "**",
+  "civ_addr": 0
 }

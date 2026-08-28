@@ -15,7 +15,7 @@ py -3 -m pip install icom-lan customtkinter pynput --quiet
 
 echo.
 echo Compilando...
-py -3 -m PyInstaller ^
+py -3.12 -m PyInstaller ^
     --onefile ^
     --windowed ^
     --name "ICOM - Memory Panel" ^

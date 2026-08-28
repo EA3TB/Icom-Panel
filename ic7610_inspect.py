@@ -69,7 +69,7 @@ def sep(title: str = ""):
 # ---------------------------------------------------------------------------
 
 def load_config() -> dict:
-    defaults = {"ip": "192.168.1.25", "user": "ea3tb", "pass": "ea3aiiea3aii", "civ_addr": 0x98}
+    defaults = {"ip": "192.168.1.25", "user": "**", "pass": "**", "civ_addr": 0x98}
     if os.path.exists(PATH_CONFIG):
         try:
             with open(PATH_CONFIG, "r", encoding="utf-8") as f:
