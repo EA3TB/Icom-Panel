@@ -768,6 +768,67 @@ class VoicePanel(ctk.CTk):
                                         border_color=COLORS["border"])
 
     # ------------------------------------------------------------------
+    # Callback de estado de la radio
+    # ------------------------------------------------------------------
+
+    async def _watch_ptt_loop(self, radio):
+        """Detecta fin de memoria de voz consultando el PTT activamente.
+        El IC-7610 no notifica el fin de memoria por CI-V, por lo que
+        se consulta get_ptt() cada 500ms mientras hay una memoria activa.
+        """
+        import time
+        try:
+            while not self._closing:
+                await asyncio.sleep(0.5)
+                with self._state_lock:
+                    active = self.active_idx
+                if active is None or self._mode != "voice":
+                    continue
+                # Hay una memoria activa — consultar PTT a la radio
+                try:
+                    ptt = await asyncio.wait_for(
+                        radio.get_ptt() if hasattr(radio, 'get_ptt')
+                        else self._query_ptt(radio),
+                        timeout=0.8
+                    )
+                    if not ptt:
+                        logging.info(f"PTT OFF (consulta activa) — T{active} finalizada")
+                        self._finish_active(active)
+                except asyncio.TimeoutError:
+                    pass
+                except Exception as e:
+                    logging.debug(f"_watch_ptt_loop: {e}")
+        except asyncio.CancelledError:
+            pass
+
+    async def _query_ptt(self, radio) -> bool:
+        """Consulta el estado PTT via CI-V 0x1C 0x00."""
+        from icom_lan import CONTROLLER_ADDR
+        frame = bytes([CIV_PREAMBLE, CIV_PREAMBLE,
+                       self._radio_config["civ_addr"], CONTROLLER_ADDR,
+                       CIV_CMD_PTT, CIV_SUB_PTT, CIV_END])
+        resp = await radio._send_civ_raw(frame, wait_response=True)
+        if resp and resp.data:
+            return bool(resp.data[0])
+        return False
+
+    def _finish_active(self, n: int):
+        """Cancela la tarea activa y vuelve la tarjeta a reposo."""
+        if self._play_task:
+            self._play_task.cancel()
+        with self._state_lock:
+            if self.active_idx == n:
+                self.active_idx = None
+        self.after(0, self._update_ui_state)
+
+    def _on_radio_state_change(self, key: str, data: dict):
+        """Llamado por icom_lan cuando la radio notifica un cambio de estado.
+        Nota: icom_lan no emite evento PTT via callback — se usa _watch_ptt_loop.
+        Este callback se mantiene para futuros eventos de estado.
+        """
+        pass
+
+    # ------------------------------------------------------------------
     # Teclado
     # ------------------------------------------------------------------
 
@@ -824,10 +885,17 @@ class VoicePanel(ctk.CTk):
                     self.after(0, lambda m=model, ip=cfg["ip"]:
                                self.status_bar.configure(
                                    text=f"Conectado  |  {m}  |  {ip}"))
+                    # Registrar callback para eventos de estado
+                    radio.set_state_change_callback(self._on_radio_state_change)
                     # Leer modo actual de la radio y sincronizar el panel
                     await self._sync_mode_from_radio()
-                    while not self._closing and self._radio is radio:
-                        await asyncio.sleep(0.5)
+                    # Vigilar PTT para detectar fin de memoria de voz
+                    ptt_task = self._loop.create_task(self._watch_ptt_loop(radio))
+                    try:
+                        while not self._closing and self._radio is radio:
+                            await asyncio.sleep(0.5)
+                    finally:
+                        ptt_task.cancel()
             except Exception as e:
                 self._radio = None
                 if not self._closing:
