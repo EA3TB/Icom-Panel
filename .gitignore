@@ -5,3 +5,7 @@ dist/
 build/
 *.spec
 *.exe
+labels.json
+ic7610_voicepanel.zip
+dist/
+build/
